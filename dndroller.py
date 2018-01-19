@@ -1,6 +1,10 @@
 from dndoutputs import *
+import sqlite3
+conn = sqlite3.connect('monsters.db')
+c = conn.cursor()
 
 def main():
+    c.execute('CREATE TABLE IF NOT EXISTS monsterInfo(monster TEXT, initmod TEXT, atkmod TEXT, dmg TEXT, dmgmod TEXT)')
     monsterdict = {}
     askforinput = True
     newround = True
@@ -14,6 +18,8 @@ def main():
         quantity = int(input('How many of these monsters would you like to put in?: '))
         sameinit = bool(int(input('Would you like to have the multiple monsters at same initiative? (1 for True, 0 for False): ')))
         monsterdict = populatedictwithinfo(name, initmod, atk, atkmod, dmg, dmgmod, quantity, sameinit, monsterdict)
+        c.execute('INSERT INTO monsterInfo (monster, initmod, atkmod, dmg, dmgmod) VALUES (?, ?, ?, ?, ?)', (name, initmod, atkmod, dmg, dmgmod))
+        conn.commit()
         tocontinue = bool(int(input('Would you like to add another monster? (1 for True, 0 for False): ')))
         print("")
         if tocontinue == True:
@@ -25,7 +31,6 @@ def main():
         newround = bool(int(input('Roll for a new round? (1 for True, 0 for False): ')))
         if newround == True:
             monsterdict = updatedict(atk, atkmod, dmg, dmgmod, monsterdict)
-            
 def populatedictwithinfo(name, initmod, atk, atkmod, dmg, dmgmod, quantity, sameinit, monsterdict):
     initiative = calculateattack('d20', initmod)
     for i in range(quantity):
